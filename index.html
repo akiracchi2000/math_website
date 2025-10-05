@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>展開問題クイズ</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #quiz-container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            overflow: hidden;
+        }
+        #question-area {
+            padding: 30px;
+        }
+        #question-number {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 15px;
+        }
+        #question-text {
+            font-size: 1.5em;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+        #options-area {
+            display: grid;
+            gap: 15px;
+            padding: 0 30px 30px;
+        }
+        .option-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            text-align: left;
+            background-color: #fff;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .option-btn:hover {
+            background-color: #f5f5f5;
+            border-color: #007bff;
+        }
+        .option-btn.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+            font-weight: bold;
+        }
+        .option-btn.incorrect {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+            font-weight: bold;
+        }
+        #feedback-area {
+            padding: 20px 30px;
+            font-size: 1.1em;
+            border-top: 1px solid #eee;
+            display: none; /* Initially hidden */
+        }
+        #result-area {
+            padding: 40px;
+            text-align: center;
+            display: none; /* Initially hidden */
+        }
+        #result-area h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        #result-area p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        #next-btn, #restart-btn {
+            padding: 12px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #next-btn:hover, #restart-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div id="quiz-container">
+    <div id="question-area">
+        <div id="question-number"></div>
+        <div id="question-text"></div>
+    </div>
+    <div id="options-area">
+        </div>
+    <div id="feedback-area">
+        </div>
+    <div id="result-area">
+        <h2>クイズ終了！</h2>
+        <p id="score-text"></p>
+        <button id="restart-btn">もう一度挑戦する</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        {
+            question: "(x + 3)(x + 7) を展開せよ。",
+            options: [
+                "x² + 10x + 21",
+                "x² + 4x + 21",
+                "x² + 10x + 10",
+                "x² - 10x - 21"
+            ],
+            answer: "x² + 10x + 21",
+            explanation: "公式 (x+a)(x+b) = x²+(a+b)x+ab を使います。a=3, b=7 なので、x²+(3+7)x+(3×7) = x²+10x+21 となります。"
+        },
+        {
+            question: "(x - 4)(x + 5) を展開せよ。",
+            options: [
+                "x² - x - 20",
+                "x² + x - 20",
+                "x² + 9x - 20",
+                "x² + x + 20"
+            ],
+            answer: "x² + x - 20",
+            explanation: "公式 (x+a)(x+b) = x²+(a+b)x+ab を使います。a=-4, b=5 なので、x²+(-4+5)x+(-4×5) = x²+x-20 となります。"
+        },
+        {
+            question: "(x + 5)² を展開せよ。",
+            options: [
+                "x² + 25",
+                "x² + 5x + 25",
+                "x² + 10x + 25",
+                "x² - 10x + 25"
+            ],
+            answer: "x² + 10x + 25",
+            explanation: "公式 (a+b)² = a²+2ab+b² を使います。a=x, b=5 なので、x²+2×x×5+5² = x²+10x+25 となります。"
+        },
+        {
+            question: "(a - 2b)² を展開せよ。",
+            options: [
+                "a² - 4ab + 4b²",
+                "a² - 4b²",
+                "a² - 2ab + 4b²",
+                "a² + 4ab + 4b²"
+            ],
+            answer: "a² - 4ab + 4b²",
+            explanation: "公式 (x-y)² = x²-2xy+y² を使います。x=a, y=2b なので、a²-2×a×(2b)+(2b)² = a²-4ab+4b² となります。"
+        },
+        {
+            question: "(x + 4y)(x - 4y) を展開せよ。",
+            options: [
+                "x² - 16y²",
+                "x² + 16y²",
+                "x² - 8y²",
+                "x² - 4y²"
+            ],
+            answer: "x² - 16y²",
+            explanation: "公式 (a+b)(a-b) = a²-b² を使います。a=x, b=4y なので、x²-(4y)² = x²-16y² となります。"
+        },
+        {
+            question: "(a + b + 3)² を展開せよ。",
+            options: [
+                "a²+b²+2ab+6a+6b+9",
+                "a²+b²+9",
+                "a²+b²+2ab+3a+3b+9",
+                "a²+b²+6ab+9"
+            ],
+            answer: "a²+b²+2ab+6a+6b+9",
+            explanation: "a+bをAと置き換えると (A+3)²=A²+6A+9 となります。Aをa+bに戻すと (a+b)²+6(a+b)+9 = a²+2ab+b²+6a+6b+9 となります。"
+        }
+    ];
+
+    const quizContainer = document.getElementById('quiz-container');
+    const questionArea = document.getElementById('question-area');
+    const questionNumberEl = document.getElementById('question-number');
+    const questionTextEl = document.getElementById('question-text');
+    const optionsArea = document.getElementById('options-area');
+    const feedbackArea = document.getElementById('feedback-area');
+    const resultArea = document.getElementById('result-area');
+    const scoreTextEl = document.getElementById('score-text');
+    const restartBtn = document.getElementById('restart-btn');
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    function startQuiz() {
+        currentQuestionIndex = 0;
+        score = 0;
+        resultArea.style.display = 'none';
+        questionArea.style.display = 'block';
+        optionsArea.style.display = 'grid';
+        feedbackArea.innerHTML = '';
+        feedbackArea.style.display = 'none';
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const question = quizData[currentQuestionIndex];
+        questionNumberEl.textContent = `第 ${currentQuestionIndex + 1} 問 / ${quizData.length} 問`;
+        questionTextEl.textContent = question.question;
+        optionsArea.innerHTML = '';
+
+        question.options.forEach(option => {
+            const button = document.createElement('button');
+            button.className = 'option-btn';
+            button.textContent = option;
+            button.addEventListener('click', () => selectAnswer(button, option, question));
+            optionsArea.appendChild(button);
+        });
+    }
+
+    function selectAnswer(button, selectedOption, question) {
+        // Disable all buttons after an answer is selected
+        document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+
+        let feedbackText = '';
+        if (selectedOption === question.answer) {
+            button.classList.add('correct');
+            score++;
+            feedbackText = `<strong>正解！</strong><br>${question.explanation}`;
+        } else {
+            button.classList.add('incorrect');
+            feedbackText = `<strong>不正解...</strong> 正解は「${question.answer}」です。<br>${question.explanation}`;
+        }
+
+        feedbackArea.innerHTML = feedbackText;
+        feedbackArea.style.display = 'block';
+
+        const nextButton = document.createElement('button');
+        nextButton.id = 'next-btn';
+        nextButton.textContent = currentQuestionIndex < quizData.length - 1 ? '次の問題へ' : '結果を見る';
+        nextButton.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                feedbackArea.style.display = 'none';
+                showQuestion();
+            } else {
+                showResults();
+            }
+        });
+        feedbackArea.appendChild(nextButton);
+    }
+    
+    function showResults() {
+        questionArea.style.display = 'none';
+        optionsArea.style.display = 'none';
+        feedbackArea.style.display = 'none';
+        resultArea.style.display = 'block';
+        scoreTextEl.textContent = `${quizData.length} 問中 ${score} 問正解しました！`;
+    }
+
+    restartBtn.addEventListener('click', startQuiz);
+
+    // Initial start
+    startQuiz();
+
+</script>
+</body>
+</html>
